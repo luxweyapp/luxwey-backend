@@ -1,0 +1,87 @@
+// This is your Prisma schema file
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("POSTGRES_PRISMA_URL")
+}
+
+// Base models with common fields
+model User {
+  id                 String         @id @default(uuid())
+  email              String         @unique
+  password           String
+  first_name         String
+  last_name          String
+  is_email_verified  Boolean        @default(false)
+  is_active         Boolean        @default(true)
+  created_at         DateTime       @default(now())
+  updated_at         DateTime       @updatedAt
+  deleted_at         DateTime?
+  role              UserRole       @default(USER)
+
+  @@index([deleted_at, is_active, is_email_verified])
+  @@map(name: "user")
+}
+
+model Admin {
+  id                String         @id @default(uuid())
+  email             String         @unique
+  password          String
+  name              String
+  role              AdminRole      @default(ADMIN)
+  is_active         Boolean        @default(true)
+  created_at        DateTime       @default(now())
+  updated_at        DateTime       @updatedAt
+  deleted_at        DateTime?
+
+  @@index([deleted_at, is_active, email])
+  @@map(name: "admin")
+
+  }
+
+
+// Enums
+enum UserRole {
+  USER
+  PREMIUM
+}
+
+enum AdminRole {
+  ADMIN
+  SUPER_ADMIN
+}
+
+model Testimony {
+  id                 String         @id @default(uuid())
+  email              String?
+  first_name         String
+  last_name          String?
+  phone_number       String?
+  city               String?
+  country            String?
+  testimony          String
+  created_at         DateTime       @default(now())
+  updated_at         DateTime       @updatedAt
+  deleted_at         DateTime?
+
+  @@index([deleted_at])
+  @@map(name: "testimony")
+  
+}
+
+model Program {
+  id                 String         @id @default(uuid())
+  name               String
+  features           String         //comma seperated strings
+  duration           String
+  price              Int
+  created_at         DateTime       @default(now())
+  updated_at         DateTime       @updatedAt
+  deleted_at         DateTime?
+
+  @@index([deleted_at, name])
+  @@map(name: "program")
+}
