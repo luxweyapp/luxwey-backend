@@ -14,27 +14,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         email: {},
         password: {},
       },
-      // authorize: async (credentials) => {
-      //   const parseCredentials = signInSchema.safeParse(credentials);
-
-      //   if (!parseCredentials.success) {
-      //     throw new Error(ERROR_MESSAGES.INVALID_CREDENTIALS);
-      //   }
-
-      //   const user = await prisma.user.findUnique({
-      //     where: { email: parseCredentials.data.email },
-      //   });
-
-      //   if (
-      //     !user ||
-      //     !user.password ||
-      //     !(await compare(parseCredentials.data.password, user.password))
-      //   ) {
-      //     return null;
-      //   }
-
-      //   return user;
-      // },
+     
       async authorize(credentials) {
 
         const user = await prisma.user.findUnique({
@@ -47,7 +27,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         return {
           id: user.id,
           email: user.email,
-          role: user.role as "USER" | "ADMIN" | "SUPER_ADMIN", // Ensure compatibility
         };
       },
     }),
