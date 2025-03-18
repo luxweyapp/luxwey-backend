@@ -8,80 +8,87 @@ datasource db {
   url      = env("POSTGRES_PRISMA_URL")
 }
 
-// Base models with common fields
 model User {
-  id                 String         @id @default(uuid())
-  email              String         @unique
-  password           String
-  first_name         String
-  last_name          String
-  is_email_verified  Boolean        @default(false)
-  is_active         Boolean        @default(true)
-  created_at         DateTime       @default(now())
-  updated_at         DateTime       @updatedAt
-  deleted_at         DateTime?
-  role              UserRole       @default(USER)
-
-  @@index([deleted_at, is_active, is_email_verified])
-  @@map(name: "user")
-}
-
-model Admin {
-  id                String         @id @default(uuid())
-  email             String         @unique
-  password          String
-  name              String
-  role              AdminRole      @default(ADMIN)
-  is_active         Boolean        @default(true)
-  created_at        DateTime       @default(now())
-  updated_at        DateTime       @updatedAt
-  deleted_at        DateTime?
-
-  @@index([deleted_at, is_active, email])
-  @@map(name: "admin")
-
-  }
-
-
-// Enums
-enum UserRole {
-  USER
-  PREMIUM
-}
-
-enum AdminRole {
-  ADMIN
-  SUPER_ADMIN
-}
-
-model Testimony {
-  id                 String         @id @default(uuid())
-  email              String?
-  first_name         String
-  last_name          String?
-  phone_number       String?
-  city               String?
-  country            String?
-  testimony          String
-  created_at         DateTime       @default(now())
-  updated_at         DateTime       @updatedAt
+  id                 String               @id @default(uuid())
+  name               String
+  email              String               @unique
+  phoneNumber       String?
+  bookings           Booking[]
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
   deleted_at         DateTime?
 
   @@index([deleted_at])
-  @@map(name: "testimony")
-  
+  @@map(name: "user")
 }
 
-model Program {
-  id                 String         @id @default(uuid())
-  name               String
-  features           String         //comma seperated strings
-  duration           String
-  price              Int
-  created_at         DateTime       @default(now())
-  updated_at         DateTime       @updatedAt
-  deleted_at         DateTime?
+enum VehicleType {
+  CAR
+  SUV
+}
 
-  @@index([deleted_at, name])
-  @@map(name: "program")
+model Vehicle {
+  id                    String               @id @default(uuid())
+  type                  VehicleType   // e.g., "4-seater car" or "7-seater SUV"
+  isAvailableForBooking Boolean
+  description           String?
+  seats                 Seat[]
+  basePrice             Float
+  createdAt             DateTime          @default(now())
+  updatedAt             DateTime          @updatedAt
+  deleted_at            DateTime?
+
+  @@index([deleted_at])
+  @@map(name: "vehicle")
+  @@unique([type, isAvailableForBooking])
+}
+
+model Seat {
+  id                    String            @id @default(uuid())
+  seatNumber            Int      // e.g., 1, 2, 3, etc.
+  isBooked              Boolean           @default(false)
+  vehicleId             String
+  vehicle               Vehicle           @relation(fields: [vehicleId], references: [id])
+  bookingId             String?
+  booking               Booking?          @relation(fields: [bookingId], references: [id])
+  createdAt             DateTime          @default(now())
+  updatedAt             DateTime          @updatedAt
+  deleted_at            DateTime?
+
+  @@index([deleted_at])
+  @@map(name: "seat")
+}
+
+model Booking {
+  id              String      @id @default(uuid())
+  userId          String
+  user            User        @relation(fields: [userId], references: [id])
+  travelDate      DateTime
+  destination     String
+  totalPrice      Float
+  pickupPoint     String
+  paymentStatus   String      @default("pending") // e.g., "pending", "completed", "failed"
+  seats           Seat[]
+  payments        Payment[] // A booking can have multiple payments
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  deleted_at      DateTime?
+
+  @@index([deleted_at])
+  @@map(name: "booking")
+}
+
+model Payment {
+  id          String      @id @default(uuid())
+  bookingId   String
+  booking     Booking  @relation(fields: [bookingId], references: [id])
+  amount      Float
+  status      String   @default("pending") // e.g., "pending", "completed", "failed"
+  paymentDate DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  deleted_at  DateTime?
+
+  @@index([deleted_at])
+  @@map(name: "payment")
 }

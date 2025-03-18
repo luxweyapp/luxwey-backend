@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { IApiError, IApiResponse, IValidationError } from "./model";
-import { testimonyFormSchema } from "./validation-schema";
-import { Testimony } from "@prisma/client";
+import { bookingFormSchema, userFormSchema } from "./validation-schema";
+import { Booking, User } from "@prisma/client";
 
 
 async function handleValidationResponse (response: Response) {
@@ -48,8 +48,15 @@ async function handleApiCalls<T> (response: Response): Promise<IApiResponse<T>> 
 //   return handleApiCalls(await fetch(process.env.NEXT_PUBLIC_BROWSER_URL + "/api/addresses/clients/" + id, { method: "GET" }));
 // };
 
-export const addTestimony = async (input: z.infer<typeof testimonyFormSchema>): Promise<IApiResponse<Testimony>> => {
-  return handleApiCalls(await fetch(process.env.NEXT_PUBLIC_BROWSER_URL + "/api/testimony", {
+export const createBooking = async (input: z.infer<typeof bookingFormSchema>): Promise<IApiResponse<Booking>> => {
+  return handleApiCalls(await fetch(process.env.NEXT_PUBLIC_BROWSER_URL + "/api/booking", {
+    method: "POST",
+    body: JSON.stringify(input),
+  }));
+};
+
+export const createUser = async (input: z.infer<typeof userFormSchema>): Promise<IApiResponse<User>> => {
+  return handleApiCalls(await fetch(process.env.NEXT_PUBLIC_BROWSER_URL + "/api/user", {
     method: "POST",
     body: JSON.stringify(input),
   }));
